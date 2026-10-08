@@ -1,16 +1,16 @@
 /**
  * js/streak.js
- * Tính toán chuỗi liên tiếp (Streak) và lưới nhiệt (Heatmap) 30 ngày gần nhất.
+ * Tính toán Chuỗi Tu Luyện (Streak) & Hệ thống Cảnh Giới Tu Tiên & Heatmap 30 ngày.
  * 
  * QUY TẮC:
- * - Một ngày được tính là "đạt" khi:
- *   số task hoàn thành / tổng số task > 50% (lớn hơn hẳn 50%, và ngày có ít nhất 1 task).
+ * - Một ngày được tính là "Đột phá thành công" khi:
+ *   số công khóa hoàn thành / tổng số công khóa > 50% (và ngày có ít nhất 1 công khóa).
  * - Chuỗi hiện tại:
  *   Số ngày đạt liên tiếp tính đến hôm nay. Nếu hôm nay chưa đạt thì vẫn tính chuỗi
- *   đến hết hôm qua (không bị reset về 0 giữa ngày khi chưa hoàn thành task).
+ *   đến hết hôm qua (không bị reset về 0 giữa ngày khi đang tu luyện).
  */
 
-import { getLocalTodayStr, escapeHtml } from './config.js';
+import { getLocalTodayStr, escapeHtml, getCultivationRealm } from './config.js';
 
 /**
  * Trừ 1 ngày từ chuỗi YYYY-MM-DD
@@ -117,19 +117,17 @@ export function calcStreaks(allTasks, todayStr = getLocalTodayStr()) {
   }
 
   // 2. Tính chuỗi dài nhất trong lịch sử:
-  // Thu thập mọi ngày có ghi nhận task và đạt chuỗi
   const allRecordedDates = Object.keys(allTasks).filter(d => Array.isArray(allTasks[d]) && allTasks[d].length > 0);
   if (allRecordedDates.length === 0) {
     return { currentStreak, longestStreak: currentStreak, todayAchieved };
   }
 
-  allRecordedDates.sort(); // Sắp xếp tăng dần theo thời gian
+  allRecordedDates.sort();
   const earliestDate = allRecordedDates[0];
   let longestStreak = currentStreak;
   let tempStreak = 0;
   let iterDate = earliestDate;
 
-  // Quét từ ngày sớm nhất đến hôm nay
   while (iterDate <= todayStr) {
     const list = allTasks[iterDate] || [];
     if (isDayAchieved(list)) {
@@ -171,7 +169,7 @@ export function getHeatmap30Days(allTasks, todayStr = getLocalTodayStr(), days =
 }
 
 /**
- * Render giao diện thẻ Streak và Heatmap vào một container HTML
+ * Render giao diện thẻ Streak, Cảnh Giới Tu Tiên và Heatmap vào container
  * @param {HTMLElement} container
  * @param {object} allTasks
  * @param {function} [onSelectDate=null]
@@ -180,41 +178,70 @@ export function renderStreakWidget(container, allTasks, onSelectDate = null) {
   const todayStr = getLocalTodayStr();
   const { currentStreak, longestStreak, todayAchieved } = calcStreaks(allTasks, todayStr);
   const heatmapData = getHeatmap30Days(allTasks, todayStr, 30);
+  const realmInfo = getCultivationRealm(currentStreak);
 
   container.innerHTML = `
-    <div class="streak-widget terminal-box">
+    <div class="streak-widget glass-card">
       <div class="streak-header">
-        <span class="prompt-prefix">&gt;</span> BẢNG ĐO THÀNH TÍCH (CHUỖI LIÊN TỤC)
+        <span class="prompt-prefix">&gt;</span> <span class="font-calligraphy title-glow">CHUỖI TU LUYỆN</span>
+      </div>
+
+      <!-- Thẻ Cảnh Giới Tu Tiên -->
+      <div class="realm-badge-card">
+        <div class="realm-stamp" title="Con dấu cảnh giới: ${escapeHtml(realmInfo.current.name)}">
+          ${escapeHtml(realmInfo.current.stamp)}
+        </div>
+        <div class="realm-details">
+          <div class="realm-title-line">
+            <span class="realm-prefix">CẢNH GIỚI:</span>
+            <strong class="realm-name font-calligraphy text-gold">${escapeHtml(realmInfo.current.name)}</strong>
+          </div>
+          <div class="realm-desc text-muted">${escapeHtml(realmInfo.current.desc)}</div>
+          
+          ${realmInfo.next ? `
+            <div class="realm-progress-wrap">
+              <div class="realm-progress-info">
+                <span>Tiến tới <strong>${escapeHtml(realmInfo.next.name)}</strong>:</span>
+                <span>${realmInfo.progress}% (còn ${realmInfo.daysToNext} ngày)</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill achieved" style="width: ${realmInfo.progress}%;"></div>
+              </div>
+            </div>
+          ` : `
+            <div class="realm-max-tag text-gold">⚡ ĐẠT ĐỈNH PHONG TIÊN ĐẠO ⚡</div>
+          `}
+        </div>
       </div>
 
       <div class="streak-stats-row">
         <div class="streak-card card-current">
           <div class="streak-label">CHUỖI HIỆN TẠI</div>
-          <div class="streak-value ${currentStreak > 0 ? 'text-highlight' : ''}">${currentStreak} <span class="unit">ngày</span></div>
+          <div class="streak-value text-jade">${currentStreak} <span class="unit">ngày</span></div>
           <div class="streak-sub">
             ${todayAchieved 
-              ? '<span class="tag-success">[✓ Hôm nay: ĐÃ ĐẠT &gt;50%]</span>' 
-              : '<span class="tag-pending">[• Hôm nay: Chưa đạt &gt;50%]</span>'}
+              ? '<span class="tag-success">[✓ Hôm nay: ĐỘT PHÁ &gt;50%]</span>' 
+              : '<span class="tag-pending">[• Hôm nay: Chưa đạt hỏa hầu]</span>'}
           </div>
         </div>
 
         <div class="streak-card card-longest">
-          <div class="streak-label">CHUỖI DÀI NHẤT</div>
-          <div class="streak-value text-accent">${longestStreak} <span class="unit">ngày</span></div>
-          <div class="streak-sub text-muted">Kỷ lục lịch sử</div>
+          <div class="streak-label">CHUỖI CAO NHẤT</div>
+          <div class="streak-value text-gold">${longestStreak} <span class="unit">ngày</span></div>
+          <div class="streak-sub text-muted">Kỷ lục đạo hạnh</div>
         </div>
       </div>
 
       <div class="heatmap-section">
         <div class="heatmap-title">
-          <span class="prompt-prefix">&gt;</span> NHẬT TRÌNH 30 NGÀY QUA:
+          <span class="prompt-prefix">&gt;</span> LINH KHÍ 30 NGÀY QUA:
         </div>
 
-        <div class="heatmap-grid" role="grid" aria-label="Lưới hoạt động 30 ngày qua">
+        <div class="heatmap-grid" role="grid" aria-label="Lưới linh khí 30 ngày qua">
           ${heatmapData.map(item => {
             const isToday = item.dateStr === todayStr;
-            const tooltip = `${item.dateStr}: ${item.done}/${item.total} task (${item.percent}%) - ${
-              item.status === 'achieved' ? 'Đạt' : item.status === 'failed' ? 'Chưa đạt' : 'Không có task'
+            const tooltip = `${item.dateStr}: ${item.done}/${item.total} công khóa (${item.percent}%) — ${
+              item.status === 'achieved' ? 'Đột phá thành công' : item.status === 'failed' ? 'Chưa đạt hỏa hầu' : 'Chưa lập công khóa'
             }`;
             return `
               <div class="heatmap-cell status-${item.status} ${isToday ? 'cell-today' : ''}" 
@@ -224,21 +251,22 @@ export function renderStreakWidget(container, allTasks, onSelectDate = null) {
                    tabindex="0"
                    aria-label="${escapeHtml(tooltip)}">
                 <span class="cell-date-num">${item.dateStr.slice(8)}</span>
+                ${item.status === 'achieved' ? '<span class="cell-seal-dot">☯</span>' : ''}
               </div>
             `;
           }).join('')}
         </div>
 
         <div class="heatmap-legend">
-          <span class="legend-item"><span class="legend-box status-achieved"></span> &gt;50% Đạt</span>
-          <span class="legend-item"><span class="legend-box status-failed"></span> &le;50% Chưa đạt</span>
-          <span class="legend-item"><span class="legend-box status-none"></span> Không có task</span>
+          <span class="legend-item"><span class="legend-box status-achieved"></span> Đột phá (&gt;50%)</span>
+          <span class="legend-item"><span class="legend-box status-failed"></span> Chưa đạt (&le;50%)</span>
+          <span class="legend-item"><span class="legend-box status-none"></span> Chưa có việc</span>
         </div>
       </div>
     </div>
   `;
 
-  // Gắn sự kiện click vào từng ô heatmap để mở modal ngày tương ứng
+  // Gắn sự kiện mở modal khi click vào ô heatmap
   if (typeof onSelectDate === 'function') {
     container.querySelectorAll('.heatmap-cell').forEach(cell => {
       const clickHandler = () => {

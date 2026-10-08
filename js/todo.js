@@ -1,23 +1,21 @@
 /**
  * js/todo.js
- * Quản lý Todo List cho từng ngày trong Modal chi tiết ngày:
- * - 3 vùng: Danh sách Task (Trái), Thơ cổ điển (Phải trên), Chi tiết Task (Phải dưới).
- * - Thêm, sửa, xóa, tích chọn hoàn thành, sắp xếp theo thời gian.
- * - Thanh tiến độ và trạng thái đạt chuỗi (>50%).
- * - Trạng thái trống với slot ảnh emptyState và ASCII fallback.
- * - Tương tác hover (desktop) và click (mobile) để xem chi tiết task.
+ * Quản lý Hộp Thoại Công Khóa Ngày (Day Modal):
+ * - Tự động đổi ảnh nền sang 'day' khi mở và hoàn trả nền cũ khi đóng.
+ * - 3 vùng: Danh sách Công khóa (Trái), Thơ cổ điển kèm ấn triện (Phải trên), Chi tiết công khóa (Phải dưới).
+ * - Hoàn thành >50% đánh dấu "Đột phá thành công", ngược lại "Chưa đạt hỏa hầu".
  */
 
 import { escapeHtml, createAssetElement } from './config.js';
 import { getTasksForDate, saveTasksForDate } from './storage.js';
 import { isDayAchieved, getDayStats } from './streak.js';
 import { getPoemForDate, getRandomPoem } from './poems.js';
+import { setBackground } from './app.js';
 
 let activeDateStr = null;
 let currentPoemState = null;
 let editingTaskId = null;
 
-// Tham chiếu phần tử DOM trong Modal
 const modalBackdrop = document.getElementById('day-modal');
 const modalDateTitle = document.getElementById('modal-date-title');
 const modalTaskCount = document.getElementById('modal-task-count');
@@ -60,16 +58,19 @@ export function openDayModal(dateStr) {
   activeDateStr = dateStr;
   editingTaskId = null;
 
+  // Đổi nền động sang trạng thái 'day'
+  setBackground('day');
+
   // Hiển thị tiêu đề ngày
   if (modalDateTitle) {
-    modalDateTitle.textContent = `${dateStr} [${formatVietnameseDate(dateStr)}]`;
+    modalDateTitle.textContent = `${dateStr} • ${formatVietnameseDate(dateStr)}`;
   }
 
   // Tải câu thơ theo ngày
   currentPoemState = getPoemForDate(dateStr);
   renderPoem(currentPoemState.poem);
 
-  // Hiển thị danh sách task
+  // Hiển thị danh sách công khóa
   renderTaskList();
 
   // Reset panel chi tiết về trạng thái chờ
@@ -80,14 +81,13 @@ export function openDayModal(dateStr) {
   modalBackdrop.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
 
-  // Focus vào ô nhập tiêu đề task để tiện thao tác bàn phím
   setTimeout(() => {
     if (inputTaskTitle) inputTaskTitle.focus();
   }, 100);
 }
 
 /**
- * Đóng Modal
+ * Đóng Modal và trả lại nền trước đó (nếu sidebar đang mở thì về sidebar, ngược lại về calendar)
  */
 export function closeDayModal() {
   if (!modalBackdrop.classList.contains('active')) return;
@@ -96,10 +96,18 @@ export function closeDayModal() {
   document.body.classList.remove('modal-open');
   activeDateStr = null;
   editingTaskId = null;
+
+  // Khôi phục nền
+  const sidebar = document.getElementById('sidebar');
+  if (sidebar && sidebar.classList.contains('open')) {
+    setBackground('sidebar');
+  } else {
+    setBackground('calendar');
+  }
 }
 
 /**
- * Hiển thị câu thơ lên vùng góc phải trên
+ * Hiển thị câu thơ lên vùng góc phải trên kèm con dấu triện đỏ
  * @param {object} poem 
  */
 function renderPoem(poem) {
@@ -111,7 +119,7 @@ function renderPoem(poem) {
 }
 
 /**
- * Hiển thị chi tiết của một task lên góc phải dưới
+ * Hiển thị chi tiết của một công khóa lên góc phải dưới
  * @param {object} task 
  */
 function showTaskDetail(task) {
@@ -119,29 +127,29 @@ function showTaskDetail(task) {
 
   const timeRange = (task.start || task.end)
     ? `${task.start || '--:--'} → ${task.end || '--:--'}`
-    : 'Không ấn định giờ';
+    : 'Chưa định canh giờ';
 
   const statusText = task.done
-    ? '<span class="status-badge badge-done">[✓ ĐÃ HOÀN THÀNH]</span>'
-    : '<span class="status-badge badge-pending">[• ĐANG CHỜ LÀM]</span>';
+    ? '<span class="status-badge badge-done">[✓ ĐÃ HOÀN TẤT CÔNG KHÓA]</span>'
+    : '<span class="status-badge badge-pending">[• ĐANG CẦN THỰC THI]</span>';
 
   taskDetailPanel.innerHTML = `
     <div class="task-detail-content">
       <div class="detail-header">
-        <span class="prompt-prefix">&gt;</span> <strong>CHI TIẾT NHIỆM VỤ</strong>
+        <span class="prompt-prefix">&gt;</span> <strong>CHI TIẾT CÔNG KHÓA</strong>
         <div class="detail-status">${statusText}</div>
       </div>
       <div class="detail-row">
-        <span class="detail-label">TIÊU ĐỀ:</span>
-        <span class="detail-val detail-title">${escapeHtml(task.title)}</span>
+        <span class="detail-label">DANH XƯNG:</span>
+        <span class="detail-val detail-title text-gold">${escapeHtml(task.title)}</span>
       </div>
       <div class="detail-row">
-        <span class="detail-label">KHUNG GIỜ:</span>
-        <span class="detail-val text-accent">${escapeHtml(timeRange)}</span>
+        <span class="detail-label">CANH GIỜ:</span>
+        <span class="detail-val text-jade">${escapeHtml(timeRange)}</span>
       </div>
       <div class="detail-row detail-desc-block">
-        <span class="detail-label">MÔ TẢ CHI TIẾT:</span>
-        <div class="detail-val desc-box">${task.desc ? escapeHtml(task.desc) : '<em class="text-muted">(Không có mô tả bổ sung)</em>'}</div>
+        <span class="detail-label">GHI CHÚ TU VI:</span>
+        <div class="detail-val desc-box">${task.desc ? escapeHtml(task.desc) : '<em class="text-muted">(Không có khẩu quyết bổ sung)</em>'}</div>
       </div>
       <div class="detail-footer text-muted">
         Mã ID: <code>${escapeHtml(task.id)}</code>
@@ -157,13 +165,13 @@ function resetTaskDetailPanel() {
   if (!taskDetailPanel) return;
   taskDetailPanel.innerHTML = `
     <div class="task-detail-placeholder">
-      <span class="prompt-prefix">&gt;</span> Di chuột (hoặc chạm trên mobile) vào một nhiệm vụ ở bên trái để xem chi tiết tại đây.
+      <span class="prompt-prefix">&gt;</span> Di chuột (hoặc chạm trên mobile) vào một công khóa ở bên trái để soi xét chi tiết tại đây.
     </div>
   `;
 }
 
 /**
- * Render danh sách Task và tiến độ hoàn thành
+ * Render danh sách Công Khóa và tiến độ hoàn thành
  */
 function renderTaskList() {
   if (!activeDateStr || !taskListContainer) return;
@@ -173,7 +181,7 @@ function renderTaskList() {
 
   // Cập nhật thông số tiến độ
   if (modalTaskCount) {
-    modalTaskCount.textContent = `${stats.done}/${stats.total} task (${stats.percent}%)`;
+    modalTaskCount.textContent = `${stats.done}/${stats.total} việc (${stats.percent}%)`;
   }
   if (modalProgressBar) {
     modalProgressBar.style.width = `${stats.percent}%`;
@@ -186,40 +194,39 @@ function renderTaskList() {
   if (modalStreakBadge) {
     if (stats.total === 0) {
       modalStreakBadge.className = 'streak-badge badge-none';
-      modalStreakBadge.textContent = '[• Chưa có nhiệm vụ]';
+      modalStreakBadge.textContent = '[• Chưa lập công khóa]';
     } else if (stats.achieved) {
       modalStreakBadge.className = 'streak-badge badge-achieved';
-      modalStreakBadge.textContent = '[✓ ĐÃ ĐẠT CHUỖI >50%]';
+      modalStreakBadge.textContent = '[✓ ĐỘT PHÁ THÀNH CÔNG >50%]';
     } else {
       modalStreakBadge.className = 'streak-badge badge-failed';
-      modalStreakBadge.textContent = '[! CHƯA ĐẠT CHUỖI (≤50%)]';
+      modalStreakBadge.textContent = '[! CHƯA ĐẠT HỎA HẦU (≤50%)]';
     }
   }
 
   // Nếu danh sách trống, hiển thị emptyState an toàn
   if (tasks.length === 0) {
     taskListContainer.innerHTML = '';
-    const emptySlot = createAssetElement('emptyState', 'Chưa có task', 'todo-empty-state');
+    const emptySlot = createAssetElement('emptyState', 'Chưa có công khóa', 'todo-empty-state');
     taskListContainer.appendChild(emptySlot);
     return;
   }
 
   // Render danh sách task
   taskListContainer.innerHTML = '';
-  tasks.forEach((task, idx) => {
+  tasks.forEach((task) => {
     const isEditing = editingTaskId === task.id;
     const taskItem = document.createElement('div');
-    taskItem.className = `task-item ${task.done ? 'is-done' : ''} ${isEditing ? 'is-editing' : ''}`;
+    taskItem.className = `task-item glass-item ${task.done ? 'is-done' : ''} ${isEditing ? 'is-editing' : ''}`;
     taskItem.setAttribute('data-id', task.id);
     taskItem.setAttribute('tabindex', '0');
 
     if (isEditing) {
-      // Chế độ chỉnh sửa inline
       taskItem.innerHTML = `
         <div class="task-edit-box">
           <div class="edit-row">
             <span class="prompt-prefix">&gt;</span>
-            <input type="text" class="edit-input-title" value="${escapeHtml(task.title)}" placeholder="Tiêu đề task" />
+            <input type="text" class="edit-input-title" value="${escapeHtml(task.title)}" placeholder="Tên công khóa..." />
           </div>
           <div class="edit-row edit-times">
             <span>Giờ:</span>
@@ -228,7 +235,7 @@ function renderTaskList() {
             <input type="time" class="edit-input-end" value="${escapeHtml(task.end || '')}" />
           </div>
           <div class="edit-row">
-            <input type="text" class="edit-input-desc" value="${escapeHtml(task.desc || '')}" placeholder="Mô tả..." />
+            <input type="text" class="edit-input-desc" value="${escapeHtml(task.desc || '')}" placeholder="Ghi chú khẩu quyết..." />
           </div>
           <div class="edit-actions">
             <button class="btn-terminal btn-save-edit" type="button">[LƯU]</button>
@@ -237,7 +244,6 @@ function renderTaskList() {
         </div>
       `;
 
-      // Bắt sự kiện Lưu / Hủy
       const btnSave = taskItem.querySelector('.btn-save-edit');
       const btnCancel = taskItem.querySelector('.btn-cancel-edit');
       const inTitle = taskItem.querySelector('.edit-input-title');
@@ -248,7 +254,7 @@ function renderTaskList() {
       btnSave.addEventListener('click', () => {
         const newTitle = inTitle.value.trim();
         if (!newTitle) {
-          alert('Tiêu đề nhiệm vụ không được để trống!');
+          alert('Tên công khóa không được để trống!');
           return;
         }
         task.title = newTitle;
@@ -270,14 +276,13 @@ function renderTaskList() {
       return;
     }
 
-    // Chế độ hiển thị bình thường
     const timeLabel = (task.start || task.end)
       ? `<span class="task-time-pill">[${escapeHtml(task.start || '--:--')}${task.end ? ' - ' + escapeHtml(task.end) : ''}]</span>`
       : '';
 
     taskItem.innerHTML = `
       <div class="task-checkbox-wrap">
-        <input type="checkbox" class="task-checkbox" id="chk-${task.id}" ${task.done ? 'checked' : ''} aria-label="Đánh dấu hoàn thành ${escapeHtml(task.title)}" />
+        <input type="checkbox" class="task-checkbox" id="chk-${task.id}" ${task.done ? 'checked' : ''} aria-label="Hoàn tất ${escapeHtml(task.title)}" />
         <label for="chk-${task.id}" class="task-custom-check"></label>
       </div>
 
@@ -290,12 +295,11 @@ function renderTaskList() {
       </div>
 
       <div class="task-actions">
-        <button class="btn-icon btn-edit-task" type="button" title="Sửa nhiệm vụ" aria-label="Sửa nhiệm vụ">[SỬA]</button>
-        <button class="btn-icon btn-del-task" type="button" title="Xóa nhiệm vụ" aria-label="Xóa nhiệm vụ">[XÓA]</button>
+        <button class="btn-icon btn-edit-task" type="button" title="Sửa công khóa" aria-label="Sửa">[SỬA]</button>
+        <button class="btn-icon btn-del-task" type="button" title="Hủy công khóa" aria-label="Xóa">[XÓA]</button>
       </div>
     `;
 
-    // Sự kiện checkbox toggle
     const chk = taskItem.querySelector('.task-checkbox');
     chk.addEventListener('change', (e) => {
       task.done = e.target.checked;
@@ -304,7 +308,6 @@ function renderTaskList() {
       showTaskDetail(task);
     });
 
-    // Sự kiện Sửa
     const btnEdit = taskItem.querySelector('.btn-edit-task');
     btnEdit.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -312,11 +315,10 @@ function renderTaskList() {
       renderTaskList();
     });
 
-    // Sự kiện Xóa
     const btnDel = taskItem.querySelector('.btn-del-task');
     btnDel.addEventListener('click', (e) => {
       e.stopPropagation();
-      if (confirm(`Bạn có chắc muốn xóa nhiệm vụ: "${task.title}"?`)) {
+      if (confirm(`Bạn có chắc muốn xóa công khóa: "${task.title}"?`)) {
         const remaining = tasks.filter(t => t.id !== task.id);
         saveTasksForDate(activeDateStr, remaining);
         renderTaskList();
@@ -324,7 +326,6 @@ function renderTaskList() {
       }
     });
 
-    // Sự kiện di chuột (hover) trên desktop & bấm (click) trên mobile để xem chi tiết
     taskItem.addEventListener('mouseenter', () => showTaskDetail(task));
     taskItem.addEventListener('click', () => showTaskDetail(task));
     taskItem.addEventListener('focus', () => showTaskDetail(task));
@@ -332,9 +333,7 @@ function renderTaskList() {
     taskListContainer.appendChild(taskItem);
   });
 
-  // Khi rời chuột khỏi danh sách thì khôi phục lại panel chi tiết
   taskListContainer.addEventListener('mouseleave', () => {
-    // Chỉ reset nếu không có task nào đang được focus
     if (!document.activeElement || !document.activeElement.closest('.task-item')) {
       resetTaskDetailPanel();
     }
@@ -342,7 +341,7 @@ function renderTaskList() {
 }
 
 /**
- * Thêm một task mới vào ngày hiện tại
+ * Thêm một công khóa mới vào ngày hiện tại
  */
 function handleAddTask(e) {
   if (e) e.preventDefault();
@@ -350,7 +349,7 @@ function handleAddTask(e) {
 
   const title = inputTaskTitle ? inputTaskTitle.value.trim() : '';
   if (!title) {
-    alert('Vui lòng nhập tiêu đề nhiệm vụ!');
+    alert('Vui lòng nhập tên công khóa tu hành!');
     if (inputTaskTitle) inputTaskTitle.focus();
     return;
   }
@@ -373,7 +372,6 @@ function handleAddTask(e) {
   tasks.push(newTask);
   saveTasksForDate(activeDateStr, tasks);
 
-  // Xóa trắng form nhập
   inputTaskTitle.value = '';
   if (inputTaskStart) inputTaskStart.value = '';
   if (inputTaskEnd) inputTaskEnd.value = '';
@@ -385,7 +383,7 @@ function handleAddTask(e) {
 }
 
 /**
- * Sắp xếp danh sách task theo giờ bắt đầu
+ * Sắp xếp danh sách công khóa theo giờ
  */
 function handleSortTasks() {
   if (!activeDateStr) return;
@@ -416,12 +414,10 @@ function handleChangePoem() {
  * Khởi tạo các sự kiện lắng nghe của Modal
  */
 export function initTodoModal() {
-  // Submit form thêm task
   if (addTaskForm) {
     addTaskForm.addEventListener('submit', handleAddTask);
   }
 
-  // Hỗ trợ nhấn Enter trong ô input tiêu đề để thêm ngay
   if (inputTaskTitle) {
     inputTaskTitle.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
@@ -431,23 +427,19 @@ export function initTodoModal() {
     });
   }
 
-  // Nút sắp xếp theo giờ
   if (btnSortTime) {
     btnSortTime.addEventListener('click', handleSortTasks);
   }
 
-  // Nút đổi thơ ngẫu nhiên
   if (btnChangePoem) {
     btnChangePoem.addEventListener('click', handleChangePoem);
   }
 
-  // Nút đóng modal (X)
   const btnCloseModal = document.getElementById('btn-close-modal');
   if (btnCloseModal) {
     btnCloseModal.addEventListener('click', closeDayModal);
   }
 
-  // Bấm ra ngoài vùng nền modal để đóng
   if (modalBackdrop) {
     modalBackdrop.addEventListener('click', (e) => {
       if (e.target === modalBackdrop) {
@@ -456,7 +448,6 @@ export function initTodoModal() {
     });
   }
 
-  // Lắng nghe sự kiện lưu dữ liệu từ các nơi khác để cập nhật lại nếu đang mở modal
   window.addEventListener('todo:data-changed', () => {
     if (activeDateStr && modalBackdrop.classList.contains('active')) {
       renderTaskList();

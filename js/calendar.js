@@ -1,12 +1,12 @@
 /**
  * js/calendar.js
- * Quản lý giao diện Lịch Tháng:
+ * Quản lý giao diện Lịch Tháng phong cách Kính Mờ Bo Tròn (Glassmorphism):
  * - Bắt đầu tuần từ Thứ Hai (T2 ... CN).
  * - Tiêu đề định dạng "Tháng MM / YYYY".
- * - Nút Tháng trước, Tháng sau, nút "Hôm nay".
- * - Đánh dấu nổi bật ngày hôm nay theo giờ địa phương (Asia/Ho_Chi_Minh).
- * - Hiển thị chấm / con số hoàn thành "đã xong / tổng" và đổi màu theo trạng thái đạt >50%.
- * - Bấm vào ô ngày mở Modal chi tiết.
+ * - Nút Tháng trước, Tháng sau, nút "Hôm nay" bo tròn trong suốt.
+ * - Đánh dấu nổi bật ngày hôm nay với hiệu ứng ánh linh khí thở chậm, nhãn "Hôm nay".
+ * - Hiển thị con dấu tu tiên cho ngày đạt >50% và chấm chu sa cho ngày chưa đạt.
+ * - Mở hộp thoại công khóa khi bấm vào ngày (tự động chuyển nền sang ảnh ngày).
  */
 
 import { getLocalTodayStr, escapeHtml } from './config.js';
@@ -34,7 +34,7 @@ function initCurrentDate() {
 }
 
 /**
- * Chuyển đổi định dạng ngày YYYY-MM-DD an toàn
+ * Chuyển đổi định dạng ngày YYYY-MM-DD
  * @param {number} y 
  * @param {number} m 1-12
  * @param {number} d 1-31
@@ -56,22 +56,22 @@ export function renderCalendar() {
   const allData = loadData();
   const tasksMap = allData.tasks || {};
 
-  // Cập nhật tiêu đề: "Tháng MM / YYYY"
+  // Cập nhật tiêu đề tháng
   calendarTitle.textContent = `Tháng ${(currentMonth + 1).toString().padStart(2, '0')} / ${currentYear}`;
 
   // Tính ngày đầu tiên của tháng (tuần bắt đầu từ Thứ Hai: 0 = T2, 6 = CN)
   const firstDayObj = new Date(currentYear, currentMonth, 1);
   const firstDayOfWeek = (firstDayObj.getDay() + 6) % 7;
 
-  // Tổng số ngày trong tháng hiện tại (xử lý chính xác năm nhuận và các tháng 28, 29, 30, 31 ngày)
+  // Tổng số ngày trong tháng hiện tại
   const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-  // Số ngày của tháng trước (để điền các ô mờ)
+  // Số ngày của tháng trước
   const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
 
   calendarGrid.innerHTML = '';
 
-  // 1. Các ngày của tháng trước (Padding đầu tháng)
+  // 1. Các ngày của tháng trước
   for (let i = firstDayOfWeek - 1; i >= 0; i--) {
     const dayNum = daysInPrevMonth - i;
     const prevMonthIdx = currentMonth === 0 ? 11 : currentMonth - 1;
@@ -104,7 +104,7 @@ export function renderCalendar() {
     calendarGrid.appendChild(cell);
   }
 
-  // 3. Các ngày của tháng sau (Padding cuối tháng để lưới luôn cân đối 35 hoặc 42 ô)
+  // 3. Các ngày của tháng sau
   const totalCellsSoFar = firstDayOfWeek + daysInMonth;
   const remainingCells = (totalCellsSoFar % 7 === 0) ? 0 : 7 - (totalCellsSoFar % 7);
 
@@ -125,21 +125,21 @@ export function renderCalendar() {
 }
 
 /**
- * Tạo một phần tử ô ngày trong lịch
+ * Tạo một phần tử ô ngày trong lịch kính mờ
  */
 function createCalendarCell({ dayNum, dateKey, isCurrentMonth, isToday, tasks }) {
   const stats = getDayStats(tasks);
   const cell = document.createElement('div');
 
-  const classes = ['calendar-day'];
+  const classes = ['calendar-day', 'glass-cell'];
   if (!isCurrentMonth) classes.push('other-month');
   if (isToday) classes.push('is-today');
 
   if (stats.total > 0) {
     if (stats.achieved) {
-      classes.push('day-achieved'); // Đạt >50% (xanh lá)
+      classes.push('day-achieved'); // Đạt >50% (xanh ngọc + con dấu)
     } else {
-      classes.push('day-failed');   // Chưa đạt <=50% (hổ phách/cam)
+      classes.push('day-failed');   // Chưa đạt (chấm chu sa)
     }
   } else {
     classes.push('day-empty');
@@ -151,29 +151,38 @@ function createCalendarCell({ dayNum, dateKey, isCurrentMonth, isToday, tasks })
   cell.setAttribute('role', 'button');
   cell.setAttribute(
     'aria-label',
-    `Ngày ${dateKey}${isToday ? ' (Hôm nay)' : ''}: ${stats.done}/${stats.total} việc đã xong`
+    `Ngày ${dateKey}${isToday ? ' (Hôm nay)' : ''}: ${stats.done}/${stats.total} công khóa hoàn thành`
   );
 
   let taskBadgeHtml = '';
   if (stats.total > 0) {
-    taskBadgeHtml = `
-      <div class="day-stats-pill ${stats.achieved ? 'pill-achieved' : 'pill-failed'}">
-        <span class="pill-dot">●</span> ${stats.done}/${stats.total}
-      </div>
-    `;
+    if (stats.achieved) {
+      taskBadgeHtml = `
+        <div class="day-stats-pill pill-achieved">
+          <span class="pill-seal">☯</span>
+          <span class="pill-num">${stats.done}/${stats.total}</span>
+        </div>
+      `;
+    } else {
+      taskBadgeHtml = `
+        <div class="day-stats-pill pill-failed">
+          <span class="pill-cinnabar">●</span>
+          <span class="pill-num">${stats.done}/${stats.total}</span>
+        </div>
+      `;
+    }
   }
 
   cell.innerHTML = `
     <div class="day-header">
       <span class="day-number">${dayNum}</span>
-      ${isToday ? '<span class="today-marker" title="Hôm nay">[H.NAY]</span>' : ''}
+      ${isToday ? '<span class="today-marker font-calligraphy">Hôm nay</span>' : ''}
     </div>
     <div class="day-body">
       ${taskBadgeHtml}
     </div>
   `;
 
-  // Bấm vào ô mở Modal nhiệm vụ của ngày đó
   const handleOpen = () => openDayModal(dateKey);
   cell.addEventListener('click', handleOpen);
   cell.addEventListener('keydown', (e) => {
@@ -221,7 +230,6 @@ export function initCalendar() {
     });
   }
 
-  // Khi dữ liệu thay đổi từ bất kỳ đâu (thêm task, xóa task, nhập backup), render lại lịch
   window.addEventListener('todo:data-changed', () => {
     renderCalendar();
   });

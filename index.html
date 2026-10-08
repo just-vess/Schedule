@@ -3,62 +3,76 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TODO LIST • TERMINAL PERSONAL SYSTEM</title>
+  <title>TU HÀNH LỊCH BIỂU • 修行曆表</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Lớp phủ hiệu ứng Scanlines màn hình CRT (Bật/tắt được) -->
+  <!-- Lớp phủ 2 tầng ảnh nền động Crossfade 600ms không chớp -->
+  <div class="bg-stage" id="bg-stage" aria-hidden="true">
+    <div class="bg-layer" id="bg-layer-1"></div>
+    <div class="bg-layer" id="bg-layer-2"></div>
+    <div class="bg-overlay"></div>
+  </div>
+
+  <!-- Canvas hiệu ứng Hạt Sáng Linh Khí trôi chậm (Bật/tắt được) -->
+  <canvas id="particles-canvas" class="particles-canvas" aria-hidden="true"></canvas>
+
+  <!-- Lớp phủ hiệu ứng Scanlines màn hình CRT cổ điển -->
   <div class="scanlines-layer" aria-hidden="true"></div>
 
-  <!-- Nền trang trí tùy chọn -->
-  <div class="app-background" id="app-bg-layer" aria-hidden="true"></div>
-
   <!-- ========================================================= -->
-  <!-- HEADER CHÍNH -->
+  <!-- HEADER CHÍNH: TIÊN GIA PHONG CÁCH                         -->
   <!-- ========================================================= -->
-  <header class="app-header">
+  <header class="app-header glass-bar">
     <div class="header-left">
-      <button id="btn-menu" class="btn-menu-toggle" type="button" aria-label="Mở bảng điều khiển bên trái" title="Mở bảng điều khiển (Chuỗi, Mục tiêu, Nhật ký)">
+      <button id="btn-menu" class="btn-menu-toggle glass-btn" type="button" aria-label="Mở Động Phủ (Menu)" title="Mở Động Phủ (Chuỗi Tu Luyện, Đạo Tâm, Ngộ Đạo Ký)">
         <span id="menu-icon-slot"></span>
-        <span class="btn-menu-text">[MENU]</span>
+        <span class="btn-menu-text font-calligraphy">[ĐỘNG PHỦ]</span>
       </button>
     </div>
 
     <div class="header-center">
-      <h1 class="terminal-main-title">
+      <h1 class="terminal-main-title font-calligraphy title-glow">
         <span class="prompt-prefix">&gt;</span> TU HÀNH LỊCH BIỂU
+        <span class="title-sub-cjk">修行曆表</span>
         <span class="cursor-blink" aria-hidden="true">█</span>
       </h1>
-      <div class="terminal-subtitle">HỆ THỐNG QUẢN LÝ NHIỆM VỤ CÁ NHÂN • GIAO DIỆN DÒNG LỆNH</div>
+      <div class="terminal-subtitle">HỆ THỐNG TU THÂN &amp; QUẢN LÝ CÔNG KHÓA • PHONG CÁCH TIÊN HIỆP DÒNG LỆNH</div>
     </div>
 
     <div class="header-right">
-      <div class="system-status-indicator">
+      <div class="system-status-indicator glass-pill">
         <span class="status-dot"></span>
-        <span class="status-text">SYSTEM ONLINE</span>
+        <span class="status-text font-calligraphy">Linh khí dồi dào</span>
       </div>
     </div>
   </header>
 
   <!-- ========================================================= -->
-  <!-- KHU VỰC GIỮA: LỊCH THÁNG -->
+  <!-- KHU VỰC GIỮA: LỊCH THÁNG TRONG SUỐT (GLASSMORPHISM)      -->
   <!-- ========================================================= -->
   <main class="main-content" id="main-content">
-    <section class="calendar-container terminal-box" aria-label="Lịch tháng quản lý nhiệm vụ">
+    <section class="calendar-container glass-card" aria-label="Lịch tháng quản lý công khóa">
+      <!-- Hoa văn mây trang trí góc (Vân vân văn) -->
+      <div class="cloud-corner cloud-top-left" aria-hidden="true"></div>
+      <div class="cloud-corner cloud-top-right" aria-hidden="true"></div>
+      <div class="cloud-corner cloud-bottom-left" aria-hidden="true"></div>
+      <div class="cloud-corner cloud-bottom-right" aria-hidden="true"></div>
+
       <!-- Thanh điều hướng tháng -->
       <div class="calendar-controls">
-        <button id="btn-prev-month" class="btn-terminal" type="button" aria-label="Xem tháng trước">
+        <button id="btn-prev-month" class="btn-terminal glass-btn" type="button" aria-label="Xem tháng trước">
           &lt; THÁNG TRƯỚC
         </button>
 
         <div class="calendar-heading-wrap">
-          <h2 id="calendar-title" class="calendar-title">Tháng 10 / 2026</h2>
-          <button id="btn-today" class="btn-terminal btn-today" type="button" aria-label="Quay về ngày hôm nay">
-            [HÔM NAY]
+          <h2 id="calendar-title" class="calendar-title font-calligraphy title-glow">Tháng 10 / 2026</h2>
+          <button id="btn-today" class="btn-terminal glass-btn btn-today font-calligraphy" type="button" aria-label="Quay về ngày hôm nay">
+            Hôm nay
           </button>
         </div>
 
-        <button id="btn-next-month" class="btn-terminal" type="button" aria-label="Xem tháng sau">
+        <button id="btn-next-month" class="btn-terminal glass-btn" type="button" aria-label="Xem tháng sau">
           THÁNG SAU &gt;
         </button>
       </div>
@@ -74,104 +88,109 @@
         <div class="weekday-header weekday-sunday" role="columnheader">CN (CHỦ NHẬT)</div>
       </div>
 
-      <!-- Lưới ngày trong tháng -->
+      <!-- Lưới ngày trong tháng (Kính mờ bo tròn) -->
       <div id="calendar-grid" class="calendar-grid" role="grid" aria-label="Lưới các ngày trong tháng">
         <!-- Render động từ js/calendar.js -->
       </div>
 
-      <!-- Chú thích chân lịch -->
+      <!-- Chú thích chân lịch (Bố cục gọn gàng, không tràn mép) -->
       <div class="calendar-footer-legend">
         <div class="legend-group">
-          <span class="legend-tag legend-achieved">● Đã đạt (&gt;50% task)</span>
-          <span class="legend-tag legend-failed">● Chưa đạt (&le;50% task)</span>
-          <span class="legend-tag legend-today">[H.NAY] Ngày hôm nay</span>
+          <span class="legend-tag legend-achieved"><span class="pill-seal">☯</span> Đột phá (&gt;50% việc)</span>
+          <span class="legend-tag legend-failed"><span class="pill-cinnabar">●</span> Chưa đạt hỏa hầu (&le;50%)</span>
+          <span class="legend-tag legend-today"><span class="today-marker-dot">✧</span> Hôm nay</span>
         </div>
-        <div id="calendar-decor-slot" class="calendar-decor-slot"></div>
+        <div class="calendar-decor-ornament" aria-hidden="true">
+          <svg width="70" height="16" viewBox="0 0 70 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 0 8 Q 15 2 30 8 Q 35 12 40 8 Q 55 2 70 8" stroke="#d9b86c" stroke-width="1.2" opacity="0.6"/>
+            <circle cx="35" cy="8" r="2.5" fill="#5fd1a8" />
+          </svg>
+        </div>
       </div>
     </section>
   </main>
 
   <!-- ========================================================= -->
-  <!-- FOOTER CHÂN TRANG -->
+  <!-- FOOTER CHÂN TRANG                                         -->
   <!-- ========================================================= -->
-  <footer class="app-footer">
+  <footer class="app-footer glass-bar">
     <div class="footer-inner">
-      <span class="prompt-prefix">&gt;</span> Terminal Task System • Dữ liệu lưu cục bộ trên trình duyệt • Không CDN/API ngoài
+      <span class="prompt-prefix">&gt;</span> Tu Hành Lịch Biểu • Dữ liệu lưu cục bộ trong Động Phủ (localStorage) • Không CDN
       <div id="mascot-slot" class="mascot-slot"></div>
     </div>
   </footer>
 
   <!-- ========================================================= -->
-  <!-- SIDEBAR (TRƯỢT TỪ BÊN TRÁI) -->
+  <!-- SIDEBAR: ĐỘNG PHỦ (TRƯỢT TỪ BÊN TRÁI)                     -->
   <!-- ========================================================= -->
   <div id="sidebar-overlay" class="sidebar-overlay" aria-hidden="true"></div>
 
-  <aside id="sidebar" class="sidebar-panel" aria-label="Bảng điều khiển Sidebar" aria-hidden="true">
+  <aside id="sidebar" class="sidebar-panel glass-panel" aria-label="Bảng điều khiển Động Phủ" aria-hidden="true">
     <div class="sidebar-header">
       <div id="sidebar-banner-slot" class="sidebar-banner-slot"></div>
       <div class="sidebar-title-row">
-        <h2 class="sidebar-title"><span class="prompt-prefix">&gt;</span> BẢNG ĐIỀU KHIỂN</h2>
-        <button id="btn-close-sidebar" class="btn-close-panel" type="button" aria-label="Đóng bảng điều khiển" title="Đóng bảng (Esc)">[X]</button>
+        <h2 class="sidebar-title font-calligraphy title-glow"><span class="prompt-prefix">&gt;</span> TIÊN GIA ĐỘNG PHỦ</h2>
+        <button id="btn-close-sidebar" class="btn-close-panel glass-btn" type="button" aria-label="Đóng Động Phủ" title="Đóng bảng (Esc)">[X]</button>
       </div>
     </div>
 
     <!-- Thanh chuyển Tab trong Sidebar -->
-    <nav class="sidebar-nav-tabs" aria-label="Điều hướng các mục Sidebar">
+    <nav class="sidebar-nav-tabs" aria-label="Điều hướng các mục Động Phủ">
       <button class="sidebar-nav-btn active" data-tab="streak" type="button">
         1. CHUỖI
       </button>
       <button class="sidebar-nav-btn" data-tab="goals" type="button">
-        2. MỤC TIÊU
+        2. ĐẠO TÂM
       </button>
       <button class="sidebar-nav-btn" data-tab="journal" type="button">
-        3. NHẬT KÝ
+        3. NGỘ ĐẠO
       </button>
       <button class="sidebar-nav-btn" data-tab="system" type="button">
-        4. CÀI ĐẶT
+        4. TÀNG KINH
       </button>
     </nav>
 
     <!-- Nội dung các Tab -->
     <div class="sidebar-tab-content">
-      <!-- TAB 1: CHUỖI (STREAK) -->
+      <!-- TAB 1: CHUỖI TU LUYỆN (STREAK & CẢNH GIỚI) -->
       <div id="tab-pane-streak" class="sidebar-tab-pane active">
         <div id="sidebar-streak-container">
           <!-- Render động từ js/streak.js -->
         </div>
       </div>
 
-      <!-- TAB 2: MỤC TIÊU NGẮN HẠN -->
+      <!-- TAB 2: ĐẠO TÂM / MỤC TIÊU -->
       <div id="tab-pane-goals" class="sidebar-tab-pane">
-        <div class="goals-section terminal-box">
-          <div class="section-title">
-            <span class="prompt-prefix">&gt;</span> THÊM MỤC TIÊU MỚI
+        <div class="goals-section glass-card">
+          <div class="section-title text-gold font-calligraphy">
+            <span class="prompt-prefix">&gt;</span> KHỞI TÂM LẬP NGUYỆN (THÊM MỤC TIÊU)
           </div>
 
           <form id="form-add-goal" class="goal-form">
             <div class="form-row">
-              <label for="goal-title-input" class="form-label">&gt; Tên mục tiêu:</label>
-              <input type="text" id="goal-title-input" class="input-terminal" placeholder="Ví dụ: Đọc hết 2 chương sách..." required />
+              <label for="goal-title-input" class="form-label">&gt; Tên mục tiêu đạo tâm:</label>
+              <input type="text" id="goal-title-input" class="input-terminal" placeholder="Ví dụ: Đọc hết 2 chương bí kíp, chạy bộ 5 dặm..." required />
             </div>
 
             <div class="form-row form-row-inline">
               <div class="inline-field">
-                <label for="goal-deadline-input" class="form-label">&gt; Hạn chót:</label>
+                <label for="goal-deadline-input" class="form-label">&gt; Hạn định ước:</label>
                 <input type="date" id="goal-deadline-input" class="input-terminal" />
               </div>
             </div>
 
             <div class="form-row">
-              <label for="goal-desc-input" class="form-label">&gt; Ghi chú / kế hoạch:</label>
-              <textarea id="goal-desc-input" class="textarea-terminal" rows="2" placeholder="Chi tiết các bước thực hiện..."></textarea>
+              <label for="goal-desc-input" class="form-label">&gt; Khẩu quyết chí hướng:</label>
+              <textarea id="goal-desc-input" class="textarea-terminal" rows="2" placeholder="Chi tiết các bước thực hiện để viên mãn..."></textarea>
             </div>
 
-            <button type="submit" class="btn-terminal btn-primary">[+ TẠO MỤC TIÊU]</button>
+            <button type="submit" class="btn-terminal btn-primary glass-btn">[+ KHỞI LẬP ĐẠO TÂM]</button>
           </form>
 
           <hr class="terminal-hr">
 
-          <div class="section-title">
-            <span class="prompt-prefix">&gt;</span> DANH SÁCH MỤC TIÊU
+          <div class="section-title text-gold font-calligraphy">
+            <span class="prompt-prefix">&gt;</span> DANH SÁCH ĐẠO TÂM
           </div>
           <div id="goals-list-container" class="goals-list">
             <!-- Render động từ js/sidebar.js -->
@@ -179,28 +198,28 @@
         </div>
       </div>
 
-      <!-- TAB 3: NHẬT KÝ (JOURNAL) -->
+      <!-- TAB 3: NGỘ ĐẠO KÝ (JOURNAL) -->
       <div id="tab-pane-journal" class="sidebar-tab-pane">
-        <div class="journal-section terminal-box">
+        <div class="journal-section glass-card">
           <div class="journal-editor-header">
             <div class="journal-date-picker-wrap">
-              <label for="journal-date-input" class="form-label">&gt; Ngày viết:</label>
+              <label for="journal-date-input" class="form-label">&gt; Ngày ghi chép:</label>
               <input type="date" id="journal-date-input" class="input-terminal" />
             </div>
             <div id="journal-save-status" class="status-tag text-muted">[✓ Đã lưu tự động]</div>
           </div>
 
           <div class="form-row">
-            <textarea id="journal-textarea" class="textarea-terminal journal-textarea" rows="8" placeholder="Gõ tâm sự, bài học rút ra hoặc suy nghĩ của ngày hôm nay... (Tự động lưu khi gõ)"></textarea>
+            <textarea id="journal-textarea" class="textarea-terminal journal-textarea" rows="8" placeholder="Ghi lại tâm đắc tu hành, ngộ đạo hoặc cảm xúc trong ngày... (Tự động lưu khi gõ)"></textarea>
           </div>
 
           <hr class="terminal-hr">
 
           <div class="journal-history-header">
-            <div class="section-title">
-              <span class="prompt-prefix">&gt;</span> LỊCH SỬ NHẬT KÝ
+            <div class="section-title text-gold font-calligraphy">
+              <span class="prompt-prefix">&gt;</span> NGỘ ĐẠO THƯ KHO
             </div>
-            <input type="text" id="journal-search-input" class="input-terminal input-search" placeholder="🔍 Tìm kiếm từ khóa..." aria-label="Tìm kiếm nhật ký theo từ khóa" />
+            <input type="text" id="journal-search-input" class="input-terminal input-search" placeholder="🔍 Tìm kiếm ngộ đạo..." aria-label="Tìm kiếm nhật ký theo từ khóa" />
           </div>
 
           <div id="journal-entries-list" class="journal-entries-list">
@@ -209,22 +228,22 @@
         </div>
       </div>
 
-      <!-- TAB 4: HỆ THỐNG / BACKUP -->
+      <!-- TAB 4: TÀNG KINH CÁC (SAO LƯU & CÀI ĐẶT) -->
       <div id="tab-pane-system" class="sidebar-tab-pane">
-        <div class="system-section terminal-box">
-          <div class="section-title">
-            <span class="prompt-prefix">&gt;</span> SAO LƯU DỰ PHÒNG (BACKUP)
+        <div class="system-section glass-card">
+          <div class="section-title text-gold font-calligraphy">
+            <span class="prompt-prefix">&gt;</span> TÀNG KINH CÁC • SAO LƯU DỰ PHÒNG
           </div>
           <p class="text-muted text-sm">
-            Dữ liệu được lưu trong trình duyệt (localStorage). Hãy xuất file định kỳ để bảo vệ dữ liệu khi dọn dẹp trình duyệt hoặc chuyển sang máy khác.
+            Dữ liệu được lưu trong Động Phủ trình duyệt (localStorage). Hãy xuất file dự phòng định kỳ để không lo thất lạc đạo hạnh.
           </p>
 
           <div class="backup-actions">
-            <button id="btn-export-json" class="btn-terminal btn-primary" type="button">
+            <button id="btn-export-json" class="btn-terminal btn-primary glass-btn" type="button">
               [XUẤT DỮ LIỆU .JSON]
             </button>
 
-            <button id="btn-trigger-import" class="btn-terminal" type="button">
+            <button id="btn-trigger-import" class="btn-terminal glass-btn" type="button">
               [NHẬP DỮ LIỆU .JSON]
             </button>
             <input type="file" id="input-import-json" accept=".json,application/json" style="display: none;" aria-label="Tải file sao lưu JSON" />
@@ -232,101 +251,111 @@
 
           <hr class="terminal-hr">
 
-          <div class="section-title">
-            <span class="prompt-prefix">&gt;</span> HIỆU ỨNG MÀN HÌNH (CRT SCANLINES)
+          <div class="section-title text-gold font-calligraphy">
+            <span class="prompt-prefix">&gt;</span> HIỆU ỨNG LINH KHÍ &amp; MÀN HÌNH
           </div>
           <p class="text-muted text-sm">
-            Hiệu ứng sọc quét mô phỏng màn hình CRT dòng lệnh cổ điển.
+            Tùy biến các hiệu ứng thiên địa linh khí trôi chậm và sọc quét CRT cổ điển.
           </p>
-          <button id="toggle-scanlines-btn" class="btn-terminal" type="button">
-            [SCANLINES: ĐANG TẮT]
-          </button>
+          <div class="system-toggle-group">
+            <button id="toggle-particles-btn" class="btn-terminal glass-btn" type="button">
+              [LINH KHÍ: ĐANG BẬT]
+            </button>
+            <button id="toggle-scanlines-btn" class="btn-terminal glass-btn" type="button">
+              [SCANLINES: ĐANG TẮT]
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </aside>
 
   <!-- ========================================================= -->
-  <!-- POPUP KHI BẤM VÀO MỘT NGÀY (DAY MODAL) -->
+  <!-- POPUP HỘP THOẠI CÔNG KHÓA NGÀY (DAY MODAL)                -->
   <!-- ========================================================= -->
   <div id="day-modal" class="modal-backdrop" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="modal-dialog terminal-box">
+    <div class="modal-dialog glass-modal scroll-animation">
+      <!-- Hoa văn mây trang trí góc Modal -->
+      <div class="cloud-corner cloud-top-left" aria-hidden="true"></div>
+      <div class="cloud-corner cloud-top-right" aria-hidden="true"></div>
+      <div class="cloud-corner cloud-bottom-left" aria-hidden="true"></div>
+      <div class="cloud-corner cloud-bottom-right" aria-hidden="true"></div>
+
       <!-- Header Modal -->
-      <div class="modal-header">
+      <div class="modal-header glass-bar">
         <div class="modal-title-wrap">
           <span class="prompt-prefix">&gt;</span>
-          <h2 id="modal-date-title" class="modal-title">2026-10-08 [Thứ Năm]</h2>
+          <h2 id="modal-date-title" class="modal-title font-calligraphy text-gold">2026-10-08 • Thứ Năm</h2>
         </div>
-        <button id="btn-close-modal" class="btn-close-modal" type="button" aria-label="Đóng hộp thoại" title="Đóng (Esc)">[X]</button>
+        <button id="btn-close-modal" class="btn-close-modal glass-btn" type="button" aria-label="Đóng hộp thoại" title="Đóng (Esc)">[X]</button>
       </div>
 
       <!-- Thân Modal chia 3 vùng (Desktop) -->
       <div class="modal-body-layout">
-        <!-- ============================================== -->
-        <!-- VÙNG TRÁI: TODO LIST CỦA NGÀY -->
-        <!-- ============================================== -->
-        <section class="modal-col-left" aria-label="Danh sách việc cần làm">
+        <!-- VÙNG TRÁI: DANH SÁCH CÔNG KHÓA -->
+        <section class="modal-col-left" aria-label="Danh sách công khóa cần làm">
           <!-- Form thêm task -->
           <form id="add-task-form" class="task-add-form">
             <div class="add-task-main-row">
               <span class="prompt-prefix">&gt;</span>
-              <input type="text" id="task-title-input" class="input-terminal flex-1" placeholder="Nhập tiêu đề nhiệm vụ mới... (Nhấn Enter để thêm)" required autocomplete="off" />
-              <button type="submit" class="btn-terminal btn-primary btn-add-task">[+ THÊM]</button>
+              <input type="text" id="task-title-input" class="input-terminal flex-1" placeholder="Nhập tên công khóa tu hành... (Enter để thêm)" required autocomplete="off" />
+              <button type="submit" class="btn-terminal btn-primary btn-add-task glass-btn">[+ THÊM]</button>
             </div>
 
             <div class="add-task-sub-row">
               <div class="time-range-inputs">
-                <span class="time-label">Giờ:</span>
+                <span class="time-label">Canh giờ:</span>
                 <input type="time" id="task-start-input" class="input-terminal input-time" aria-label="Giờ bắt đầu" />
                 <span class="time-arrow">→</span>
                 <input type="time" id="task-end-input" class="input-terminal input-time" aria-label="Giờ kết thúc" />
               </div>
-              <input type="text" id="task-desc-input" class="input-terminal input-desc-quick" placeholder="Ghi chú nhanh (tùy chọn)..." />
+              <input type="text" id="task-desc-input" class="input-terminal input-desc-quick" placeholder="Khẩu quyết vắn tắt (tùy chọn)..." />
             </div>
           </form>
 
           <!-- Thanh tiến độ hoàn thành -->
-          <div class="todo-progress-card">
+          <div class="todo-progress-card glass-card">
             <div class="progress-info-row">
-              <span class="progress-label">TIẾN ĐỘ: <strong id="modal-task-count">0/0 task (0%)</strong></span>
-              <span id="modal-streak-badge" class="streak-badge badge-none">[• Chưa có nhiệm vụ]</span>
-              <button id="btn-sort-time" class="btn-terminal btn-xs" type="button" title="Sắp xếp nhiệm vụ theo giờ bắt đầu">[SẮP XẾP GIỜ ⇅]</button>
+              <span class="progress-label">CÔNG ĐỨC: <strong id="modal-task-count">0/0 việc (0%)</strong></span>
+              <span id="modal-streak-badge" class="streak-badge badge-none">[• Chưa lập công khóa]</span>
+              <button id="btn-sort-time" class="btn-terminal glass-btn btn-xs" type="button" title="Sắp xếp công khóa theo canh giờ">[SẮP XẾP GIỜ ⇅]</button>
             </div>
             <div class="progress-track">
               <div id="modal-progress-bar" class="progress-fill" style="width: 0%;"></div>
             </div>
           </div>
 
-          <!-- Danh sách task -->
+          <!-- Danh sách công khóa cuộn -->
           <div id="task-list-container" class="task-list-scroll">
             <!-- Render động từ js/todo.js -->
           </div>
         </section>
 
-        <!-- ============================================== -->
         <!-- VÙNG PHẢI: CHIA TRÊN VÀ DƯỚI -->
-        <!-- ============================================== -->
         <div class="modal-col-right">
-          <!-- PHẢI TRÊN: CÂU THƠ TRUNG QUỐC CỔ ĐIỂN -->
-          <section class="modal-right-top poem-box" aria-label="Thơ cổ điển thưởng ngoạn">
+          <!-- PHẢI TRÊN: CỔ THI THƯỞNG NGOẠN KÈM ẤN TRIỆN -->
+          <section class="modal-right-top poem-box glass-card" aria-label="Thơ cổ điển thưởng ngoạn">
             <div class="box-top-bar">
-              <span class="box-tag"><span class="prompt-prefix">&gt;</span> CỔ THI THƯỞNG NGOẠN</span>
-              <button id="btn-change-poem" class="btn-terminal btn-xs" type="button" title="Đổi sang câu thơ ngẫu nhiên khác">[CÂU KHÁC ↺]</button>
+              <span class="box-tag font-calligraphy text-gold"><span class="prompt-prefix">&gt;</span> CỔ THI THƯỞNG NGOẠN</span>
+              <button id="btn-change-poem" class="btn-terminal glass-btn btn-xs" type="button" title="Đổi sang câu thơ ngẫu nhiên khác">[CÂU KHÁC ↺]</button>
             </div>
 
             <div class="poem-display">
-              <div id="poem-chinese" class="poem-chinese font-cjk">床前明月光，疑是地上霜。</div>
+              <div class="poem-chinese-wrap">
+                <div id="poem-chinese" class="poem-chinese font-calligraphy">床前明月光，疑是地上霜。</div>
+                <div class="chinese-seal-stamp" title="Đạo ấn" aria-hidden="true">道</div>
+              </div>
               <div id="poem-pinyin" class="poem-pinyin">Chuáng qián míng yuè guāng, yí shì dì shàng shuāng.</div>
               <div id="poem-vietnamese" class="poem-vietnamese">Đầu giường ánh trăng rọi, ngỡ mặt đất phủ sương.</div>
-              <div id="poem-meta" class="poem-meta text-accent">— Lý Bạch • 《Tĩnh dạ tứ》</div>
+              <div id="poem-meta" class="poem-meta text-gold font-calligraphy">— Lý Bạch • 《Tĩnh dạ tứ》</div>
             </div>
           </section>
 
-          <!-- PHẢI DƯỚI: PANEL CHI TIẾT TASK KHI HOVER/TOUCH -->
-          <section class="modal-right-bottom detail-box" aria-label="Xem chi tiết nhiệm vụ">
+          <!-- PHẢI DƯỚI: PANEL CHI TIẾT CÔNG KHÓA -->
+          <section class="modal-right-bottom detail-box glass-card" aria-label="Xem chi tiết công khóa">
             <div id="task-detail-panel" class="task-detail-panel">
               <div class="task-detail-placeholder">
-                <span class="prompt-prefix">&gt;</span> Di chuột (hoặc chạm trên mobile) vào một nhiệm vụ ở bên trái để xem chi tiết tại đây.
+                <span class="prompt-prefix">&gt;</span> Di chuột (hoặc chạm trên mobile) vào một công khóa ở bên trái để soi xét chi tiết tại đây.
               </div>
             </div>
           </section>
