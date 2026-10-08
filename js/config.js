@@ -9,11 +9,11 @@
 // Bảng ánh xạ ảnh nền tương đối (phù hợp tuyệt đối với cả domain gốc và GitHub Pages /Schedule/)
 export const BACKGROUNDS = {
   // Ảnh nền mặc định (trắng đen thư pháp) khi xem lịch
-  calendar: './assets/images/white-black-and-chinese-painting-ink-powerpoint-background_5501ec0fba__960_540.avif',
+  calendar: './asset/white-black-and-chinese-painting-ink-powerpoint-background_5501ec0fba__960_540.avif',
   // Ảnh nền khi mở Động Phủ (Sidebar)
-  sidebar: './assets/images/pngtree-chinese-wind-material-h5-background-image_123519.jpg',
+  sidebar: './asset/pngtree-chinese-wind-material-h5-background-image_123519.jpg',
   // Ảnh nền khi mở Hộp thoại Công khóa ngày (Popup)
-  day: './assets/images/aa.jpg',
+  day: './asset/aa.jpg',
 };
 
 // Ánh xạ các "slot" ảnh sang đường dẫn tương đối trong thư mục ./assets/images/

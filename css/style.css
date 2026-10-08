@@ -48,12 +48,12 @@
   --glass-blur: blur(12px);
   --glass-shadow: 0 16px 36px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 
-  /* Lớp phủ màn che nền (đảm bảo chữ luôn đọc rõ ràng) */
+  /* Lớp phủ màn che nền (vừa đủ mờ để thấy rõ tranh nền mà chữ vẫn sáng rõ) */
   --bg-overlay-gradient: linear-gradient(
     180deg,
-    rgba(11, 13, 16, 0.72) 0%,
-    rgba(11, 13, 16, 0.85) 50%,
-    rgba(11, 13, 16, 0.92) 100%
+    rgba(11, 13, 16, 0.45) 0%,
+    rgba(11, 13, 16, 0.55) 50%,
+    rgba(11, 13, 16, 0.65) 100%
   );
 
   /* Phông chữ */
