@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
+  <!-- Subtle terminal grid background pattern -->
+  <line x1="0" y1="0" x2="60" y2="0" stroke="#172233" stroke-width="0.8" />
+  <line x1="0" y1="0" x2="0" y2="60" stroke="#172233" stroke-width="0.8" />
+  <circle cx="0" cy="0" r="1" fill="#00ff66" opacity="0.15" />
+  <circle cx="60" cy="0" r="1" fill="#00ff66" opacity="0.15" />
+  <circle cx="0" cy="60" r="1" fill="#00ff66" opacity="0.15" />
+  <circle cx="60" cy="60" r="1" fill="#00ff66" opacity="0.15" />
+</svg>

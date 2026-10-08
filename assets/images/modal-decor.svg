@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 30" width="160" height="30" fill="none">
+  <!-- Terminal modal decor badge -->
+  <rect x="2" y="2" width="156" height="26" stroke="#233044" stroke-width="1" fill="#0f141c" />
+  <polyline points="10,15 20,8 20,22 10,15" fill="#00ff66" />
+  <text x="30" y="19" font-family="'Consolas', monospace" font-size="10" fill="#00ff66" letter-spacing="1">TASK MATRIX</text>
+  <circle cx="140" cy="15" r="3" fill="#ffb454" />
+</svg>

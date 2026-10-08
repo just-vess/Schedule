@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 24" width="120" height="24" fill="none">
+  <!-- Minimalist terminal calendar decor -->
+  <rect x="0" y="4" width="16" height="16" stroke="#233044" stroke-width="1" />
+  <rect x="3" y="7" width="4" height="4" fill="#00ff66" />
+  <rect x="9" y="7" width="4" height="4" fill="#00ff66" opacity="0.4" />
+  <rect x="3" y="13" width="4" height="4" fill="#00ff66" opacity="0.4" />
+  <rect x="9" y="13" width="4" height="4" fill="#ffb454" />
+  
+  <line x1="24" y1="12" x2="116" y2="12" stroke="#233044" stroke-dasharray="3,3" />
+  <circle cx="116" cy="12" r="2" fill="#00ff66" />
+</svg>
