@@ -88,16 +88,16 @@ export function setBackground(stateName) {
  * Gắn các slot hình ảnh trang trí
  */
 function mountDecorSlots() {
-  // Menu icon
+  // Menu icon: làm sạch trước khi chèn (idempotent)
   const menuIconSlot = document.getElementById('menu-icon-slot');
-  if (menuIconSlot) {
+  if (menuIconSlot && menuIconSlot.children.length === 0) {
     const icon = createAssetElement('menuIcon', 'Động Phủ', 'nav-icon');
     menuIconSlot.appendChild(icon);
   }
 
-  // Mascot ở chân trang
+  // Mascot ở chân trang: làm sạch trước khi chèn (idempotent)
   const mascotSlot = document.getElementById('mascot-slot');
-  if (mascotSlot) {
+  if (mascotSlot && mascotSlot.children.length === 0) {
     const mascot = createAssetElement('mascot', 'Tiên Gia Linh Thú', 'app-mascot');
     mascotSlot.appendChild(mascot);
   }

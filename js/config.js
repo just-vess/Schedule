@@ -6,14 +6,14 @@
  * - Preload ảnh với cảnh báo debug console.warn chi tiết.
  */
 
-// Bảng ánh xạ ảnh nền tương đối (phù hợp tuyệt đối với cả domain gốc và GitHub Pages /Schedule/)
+// Bảng ánh xạ ảnh nền tương đối (chuẩn thư mục ./assets/images/ trên GitHub Pages)
 export const BACKGROUNDS = {
   // Ảnh nền mặc định (trắng đen thư pháp) khi xem lịch
-  calendar: './asset/white-black-and-chinese-painting-ink-powerpoint-background_5501ec0fba__960_540.avif',
+  calendar: './assets/images/bg-default.avif',
   // Ảnh nền khi mở Động Phủ (Sidebar)
-  sidebar: './asset/pngtree-chinese-wind-material-h5-background-image_123519.jpg',
-  // Ảnh nền khi mở Hộp thoại Công khóa ngày (Popup)
-  day: './asset/aa.jpg',
+  sidebar: './assets/images/bg-sidebar.jpg',
+  // Ảnh nền khi mở Hộp thoại Công khóa ngày (Popup - ảnh dọc)
+  day: './assets/images/bg-day.jpg',
 };
 
 // Ánh xạ các "slot" ảnh sang đường dẫn tương đối trong thư mục ./assets/images/
